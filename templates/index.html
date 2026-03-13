@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizzería - Captura de Pedidos</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .form-section, .table-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #8da4c8; }
+        .flash-messages { color: green; font-weight: bold; margin-bottom: 15px; }
+        .flash-error { color: red; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Registro de Pedidos - Pizzería 🍕</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-messages {% if category == 'error' %}flash-error{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('index') }}">
+        {{ form.hidden_tag() }} <div class="form-section">
+            <h3>Datos del Cliente</h3>
+            <p>
+                {{ form.nombre.label }} {{ form.nombre(size=30) }}
+                {{ form.direccion.label }} {{ form.direccion(size=40) }}
+                {{ form.telefono.label }} {{ form.telefono(size=15) }}
+            </p>
+        </div>
+
+        <div class="form-section">
+            <h3>Detalles de la Pizza</h3>
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <strong>{{ form.tamano.label }}</strong><br>
+                    {% for subfield in form.tamano %}
+                        <tr>
+                            <td>{{ subfield }}</td>
+                            <td>{{ subfield.label }}</td>
+                        </tr><br>
+                    {% endfor %}
+                </div>
+                <div>
+                    <strong>Ingredientes Extra</strong><br>
+                    {{ form.jamon }} {{ form.jamon.label }}<br>
+                    {{ form.pina }} {{ form.pina.label }}<br>
+                    {{ form.champinones }} {{ form.champinones.label }}
+                </div>
+                <div>
+                    <strong>{{ form.num_pizzas.label }}</strong><br>
+                    {{ form.num_pizzas(size=5) }}
+                    <br><br>
+                    {{ form.agregar() }} </div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h3>Detalle del Pedido Actual</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tamaño</th>
+                        <th>Ingredientes</th>
+                        <th>Num. Pizzas</th>
+                        <th>Sub Total</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pedido %}
+                    <tr>
+                        <td>{{ item.tamano }}</td>
+                        <td>{{ item.ingredientes }}</td>
+                        <td>{{ item.num_pizzas }}</td>
+                        <td>${{ item.subtotal }}</td>
+                        <td><a href="{{ url_for('quitar_pizza', index=loop.index0) }}">Quitar</a></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No hay pizzas agregadas aún.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <h4 style="text-align: right; background: white; padding: 5px;">Total Acumulado: ${{ total }}</h4>
+            
+            <div style="text-align: right;">
+                {{ form.terminar() }} </div>
+        </div>
+    </form>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{ url_for('ventas') }}"><button>Consultar Ventas por Día/Mes</button></a>
+    </div>
+
+</div>
+
+</body>
+</html>
