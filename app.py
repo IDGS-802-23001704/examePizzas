@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from models import db, Cliente, Pizza, Pedido, DetallePedido
 from forms import PedidoForm
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import extract, func
 
 app = Flask(__name__)
@@ -23,25 +23,27 @@ PRECIO_INGREDIENTE = 10
 def index():
     form = PedidoForm()
     
-    # Inicializamos la variable de sesión si no existe
     if 'pedido' not in session:
         session['pedido'] = []
         
-    # Magia anti-amnesia: Pre-llenamos el formulario si hay datos guardados en la sesión
     if request.method == 'GET' and 'cliente_temporal' in session:
         form.nombre.data = session['cliente_temporal']['nombre']
         form.direccion.data = session['cliente_temporal']['direccion']
         form.telefono.data = session['cliente_temporal']['telefono']
+
+        if 'fecha' in session['cliente_temporal']:
+            form.fecha.data = datetime.strptime(session['cliente_temporal']['fecha'], '%Y-%m-%d').date()
+
         form.tamano.data = session['cliente_temporal']['tamano']
         form.num_pizzas.data = session['cliente_temporal']['num_pizzas']
         
     if request.method == 'POST':
         if form.agregar.data and form.validate_on_submit():
-            # Guardamos los datos del cliente y selección actual en sesión para que no se borren
             session['cliente_temporal'] = {
                 'nombre': form.nombre.data,
                 'direccion': form.direccion.data,
                 'telefono': form.telefono.data,
+                'fecha': form.fecha.data.strftime('%Y-%m-%d') if form.fecha.data else date.today().strftime('%Y-%m-%d'),
                 'tamano': form.tamano.data,
                 'num_pizzas': form.num_pizzas.data
             }
@@ -89,7 +91,7 @@ def index():
             total_pedido = sum(item['subtotal'] for item in session['pedido'])
             nuevo_pedido = Pedido(
                 id_cliente=nuevo_cliente.id_cliente,
-                fecha=date.today(),
+                fecha=form.fecha.data,
                 total=total_pedido
             )
             db.session.add(nuevo_pedido)
@@ -161,7 +163,6 @@ def ventas():
 
 @app.route('/detalle/<int:id>', methods=['GET'])
 def detalle_venta(id):
-    # Buscamos el pedido por su ID. Si no existe, mandamos un error 404.
     pedido = Pedido.query.get_or_404(id)
     return render_template('detalle.html', pedido=pedido)
 

@@ -12,8 +12,8 @@
             <div class="card" style="margin-bottom: 20px;">
                 <h3><i class="fas fa-user"></i> Cliente</h3>
                 <div class="form-group">
-                    <label><i class="fas fa-user"></i> Nombre</label>
-                    {{ form.nombre(class="form-control", placeholder="Ej: Juan Pérez") }}
+                    <label><i class="fas fa-solid fa-signature"></i> Nombre</label>
+                    {{ form.nombre(class="form-control", placeholder="Ej: Jose Lopez") }}
                     {% if form.nombre.errors %}
                         <ul class="error-list">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
@@ -25,9 +25,13 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-phone"></i> Teléfono</label>
-                        {{ form.telefono(class="form-control", placeholder="555-1234") }}
+                        {{ form.telefono(class="form-control", placeholder="555-1234-123") }}
                     </div>
                 </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><i class="fas fa-calendar-alt"></i> Fecha del Pedido</label>
+                        {{ form.fecha(class="form-control", type="date") }}
+                    </div>
             </div>
 
             <div class="card">
