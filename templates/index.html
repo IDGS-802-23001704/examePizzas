@@ -1,111 +1,160 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Pizzería - Captura de Pedidos</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .form-section, .table-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #8da4c8; }
-        .flash-messages { color: green; font-weight: bold; margin-bottom: 15px; }
-        .flash-error { color: red; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-    </style>
-</head>
-<body>
+{% extends "layout.html" %}
 
-<div class="container">
-    <h2>Registro de Pedidos - Pizzería 🍕</h2>
+{% block title %}Pizzas{% endblock %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-messages {% if category == 'error' %}flash-error{% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+{% block content %}
+<form method="POST" action="{{ url_for('index') }}">
+    {{ form.hidden_tag() }}
 
-    <form method="POST" action="{{ url_for('index') }}">
-        {{ form.hidden_tag() }} <div class="form-section">
-            <h3>Datos del Cliente</h3>
-            <p>
-                {{ form.nombre.label }} {{ form.nombre(size=30) }}
-                {{ form.direccion.label }} {{ form.direccion(size=40) }}
-                {{ form.telefono.label }} {{ form.telefono(size=15) }}
-            </p>
-        </div>
-
-        <div class="form-section">
-            <h3>Detalles de la Pizza</h3>
-            <div style="display: flex; justify-content: space-between;">
-                <div>
-                    <strong>{{ form.tamano.label }}</strong><br>
-                    {% for subfield in form.tamano %}
-                        <tr>
-                            <td>{{ subfield }}</td>
-                            <td>{{ subfield.label }}</td>
-                        </tr><br>
-                    {% endfor %}
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+        
+        <div>
+            <div class="card" style="margin-bottom: 20px;">
+                <h3><i class="fas fa-user"></i> Cliente</h3>
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nombre</label>
+                    {{ form.nombre(class="form-control", placeholder="Ej: Juan Pérez") }}
+                    {% if form.nombre.errors %}
+                        <ul class="error-list">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
                 </div>
-                <div>
-                    <strong>Ingredientes Extra</strong><br>
-                    {{ form.jamon }} {{ form.jamon.label }}<br>
-                    {{ form.pina }} {{ form.pina.label }}<br>
-                    {{ form.champinones }} {{ form.champinones.label }}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                        {{ form.direccion(class="form-control", placeholder="Calle #123") }}
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Teléfono</label>
+                        {{ form.telefono(class="form-control", placeholder="555-1234") }}
+                    </div>
                 </div>
-                <div>
-                    <strong>{{ form.num_pizzas.label }}</strong><br>
-                    {{ form.num_pizzas(size=5) }}
-                    <br><br>
-                    {{ form.agregar() }} </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-pizza-slice"></i>¡Arma la pizza!</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">Tamaño</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            {% for subfield in form.tamano %}
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                {{ subfield() }}
+                                <span style="display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-circle" style="color: #ff7e5f; font-size: {% if loop.index == 1 %}0.6rem{% elif loop.index == 2 %}0.8rem{% else %}1rem{% endif %};"></i>
+                                    {{ subfield.label.text }}
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">Extras (+$10)</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                {{ form.jamon() }} 🥓 Jamón
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                {{ form.pina() }} 🍍 Piña
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                {{ form.champinones() }} 🍄 Champiñones
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label><i class="fas fa-sort-numeric-up"></i> Cantidad</label>
+                        {{ form.num_pizzas(class="form-control", value="1", min="1") }}
+                    </div>
+                    <button type="submit" name="agregar" value="Agregar" class="btn" style="margin-top: 24px;">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="table-section">
-            <h3>Detalle del Pedido Actual</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tamaño</th>
-                        <th>Ingredientes</th>
-                        <th>Num. Pizzas</th>
-                        <th>Sub Total</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div class="card" style="position: sticky; top: 100px; height: fit-content;">
+            <h3><i class="fas fa-shopping-cart"></i> Pedido</h3>
+            
+            <div style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;">
+                {% if pedido %}
                     {% for item in pedido %}
-                    <tr>
-                        <td>{{ item.tamano }}</td>
-                        <td>{{ item.ingredientes }}</td>
-                        <td>{{ item.num_pizzas }}</td>
-                        <td>${{ item.subtotal }}</td>
-                        <td><a href="{{ url_for('quitar_pizza', index=loop.index0) }}">Quitar</a></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5">No hay pizzas agregadas aún.</td>
-                    </tr>
+                    <div style="background: #fffaf5; padding: 12px; border-radius: 15px; margin-bottom: 10px; border-left: 3px solid #ff7e5f;">
+                        <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                            <span>{{ item.num_pizzas }}x {{ item.tamano }}</span>
+                            <span>${{ item.subtotal }}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666; margin: 5px 0;">
+                            {{ item.ingredientes }}
+                        </div>
+                        <div style="text-align: right;">
+                            <a href="{{ url_for('quitar_pizza', index=loop.index0) }}" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
-            
-            <h4 style="text-align: right; background: white; padding: 5px;">Total Acumulado: ${{ total }}</h4>
-            
-            <div style="text-align: right;">
-                {{ form.terminar() }} </div>
+                {% else %}
+                    <div style="text-align: center; padding: 30px; color: #999;">
+                        <i class="fas fa-pizza-slice" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 10px;">Pedido vacío</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="border-top: 2px dashed #ffe4d5; padding: 15px 0;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 700;">
+                    <span>Total:</span>
+                    <span style="color: #ff7e5f;">${{ total }}</span>
+                </div>
+            </div>
+
+            <button type="submit" name="terminar" value="Terminar" class="btn btn-success" {% if not pedido %}disabled style="opacity: 0.5;"{% endif %}>
+                <i class="fas fa-check"></i> Confirmar Pedido
+            </button>
         </div>
-    </form>
-    
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="{{ url_for('ventas') }}"><button>Consultar Ventas por Día/Mes</button></a>
+    </div>
+</form>
+
+<div class="card" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3><i class="fas fa-calendar-day"></i> Ventas de Hoy</h3>
+        <span style="background: #28a745; color: white; padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.95rem;">
+            Total: ${{ total_ventas_hoy }}
+        </span>
     </div>
 
+    <div style="max-height: 300px; overflow-y: auto; padding-right: 10px;">
+        {% if ventas_hoy %}
+            {% for venta in ventas_hoy %}
+            <div style="background: #fffaf5; padding: 12px; border-radius: 15px; margin-bottom: 10px; border-left: 3px solid #28a745;">
+                <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                    <span style="color: #555;">Pedido #{{ venta.id_pedido }}</span>
+                    <span style="color: #ff7e5f; font-size: 1.1rem;">${{ venta.total }}</span>
+                </div>
+                
+                <div style="font-size: 0.85rem; color: #666; margin: 8px 0;">
+                    <div><i class="fas fa-user" style="width: 15px;"></i> {{ venta.cliente.nombre }}</div>
+                    <div style="margin-top: 3px;"><i class="fas fa-phone" style="width: 15px;"></i> {{ venta.cliente.telefono }}</div>
+                </div>
+                
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="{{ url_for('detalle_venta', id=venta.id_pedido) }}" class="btn" style="background: #17a2b8; color: white; padding: 6px 12px; font-size: 0.85rem; text-decoration: none; border-radius: 5px;">
+                        <i class="fas fa-eye"></i> Ver Detalles
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <i class="fas fa-store-slash" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                <p style="margin-top: 10px;">Aún no hay ventas el día de hoy.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

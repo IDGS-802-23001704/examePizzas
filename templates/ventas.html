@@ -1,155 +1,105 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Pizzería - Reporte de Ventas</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .search-section, .results-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #8da4c8; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .detalle-tabla { width: 90%; margin: 10px auto; background-color: #eef; font-size: 0.9em; border: 1px dashed #aaa; }
-    </style>
-</head>
-<body>
+{% extends "layout.html" %}
 
-<div class="container">
-    <h2>Reporte de Ventas 📊🍕</h2>
+{% block title %}Ventas{% endblock %}
 
-    <div class="search-section">
-        <form method="POST" action="{{ url_for('ventas') }}">
-            <div style="margin-bottom: 15px;">
-                <label>
-                    <input type="radio" name="tipo_busqueda" value="dia" required id="radio_dia" onclick="toggleSelects()"> 
-                    <strong>Buscar por Día:</strong>
-                </label>
-                <select name="dia_seleccionado" id="select_dia" disabled>
-                    <option value="" disabled selected>Selecciona un día...</option>
-                    <option value="2">Lunes</option>
-                    <option value="3">Martes</option>
-                    <option value="4">Miércoles</option>
-                    <option value="5">Jueves</option>
-                    <option value="6">Viernes</option>
-                    <option value="7">Sábado</option>
-                    <option value="1">Domingo</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label>
-                    <input type="radio" name="tipo_busqueda" value="mes" required id="radio_mes" onclick="toggleSelects()"> 
-                    <strong>Buscar por Mes:</strong>
-                </label>
-                <select name="mes_seleccionado" id="select_mes" disabled>
-                    <option value="" disabled selected>Selecciona un mes...</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-            </div>
-
-            <button type="submit">Generar Reporte</button>
-        </form>
-    </div>
-
-    <script>
-        function toggleSelects() {
-            const radioDia = document.getElementById('radio_dia');
-            const selectDia = document.getElementById('select_dia');
-            const radioMes = document.getElementById('radio_mes');
-            const selectMes = document.getElementById('select_mes');
-
-            if (radioDia.checked) {
-                selectDia.disabled = false;
-                selectDia.required = true;
-                selectMes.disabled = true;
-                selectMes.required = false;
-                selectMes.selectedIndex = 0; // Resetea el select
-            } else if (radioMes.checked) {
-                selectMes.disabled = false;
-                selectMes.required = true;
-                selectDia.disabled = true;
-                selectDia.required = false;
-                selectDia.selectedIndex = 0; // Resetea el select
-            }
-        }
-    </script>
-
-    <div class="results-section">
-        <h3>Resultados del Reporte</h3>
+{% block content %}
+<div class="card">
+    <h3><i class="fas fa-search"></i> Buscar Ventas</h3>
+    <form method="POST" action="{{ url_for('ventas') }}" style="display: flex; gap: 30px; align-items: flex-end; flex-wrap: wrap;">
         
-        {% if ventas %}
-            <table>
+        <div>
+            <label style="font-weight: bold; color: #555;"><i class="fas fa-calendar-day"></i> Día de la semana</label>
+            <select name="dia_seleccionado" class="form-control" style="margin-top: 5px;">
+                <option value="todos" selected>Todos los días</option>
+                <option value="2">Lunes</option>
+                <option value="3">Martes</option>
+                <option value="4">Miércoles</option>
+                <option value="5">Jueves</option>
+                <option value="6">Viernes</option>
+                <option value="7">Sábado</option>
+                <option value="1">Domingo</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="font-weight: bold; color: #555;"><i class="fas fa-calendar-alt"></i> Mes</label>
+            <select name="mes_seleccionado" class="form-control" style="margin-top: 5px;">
+                <option value="todos" selected>Todos los meses</option>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-bolt"></i> Generar Reporte</button>
+    </form>
+</div>
+
+<script>
+    function toggleSelects() {
+        const dia = document.getElementById('select_dia');
+        const mes = document.getElementById('select_mes');
+        dia.disabled = !document.querySelector('input[value="dia"]').checked;
+        mes.disabled = !document.querySelector('input[value="mes"]').checked;
+    }
+</script>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3><i class="fas fa-list"></i> Ventas</h3>
+        <span style="background: #ff7e5f; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600;">
+            Total: ${{ total }}
+        </span>
+    </div>
+    
+    {% if ventas %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>ID Pedido</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
-                        <th>Desglose de Pizzas</th>
-                        <th>Total</th>
+                    <tr style="background: #fffaf5;">
+                        <th style="padding: 12px; text-align: left;">ID</th>
+                        <th style="padding: 12px; text-align: left;">Cliente</th>
+                        <th style="padding: 12px; text-align: left;">Fecha</th>
+                        <th style="padding: 12px; text-align: center;">Detalles</th>
+                        <th style="padding: 12px; text-align: left;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for venta in ventas %}
-                    <tr>
-                        <td>#{{ venta.id_pedido }}</td>
-                        <td>
-                            <strong>{{ venta.cliente.nombre }}</strong><br>
-                            <small>{{ venta.cliente.telefono }}</small>
+                    <tr style="border-bottom: 1px solid #ffe4d5;">
+                        <td style="padding: 12px;">#{{ venta.id_pedido }}</td>
+                        <td style="padding: 12px;">
+                            <div><strong>{{ venta.cliente.nombre }}</strong></div>
+                            <small style="color: #666;">{{ venta.cliente.telefono }}</small>
                         </td>
-                        <td>{{ venta.fecha.strftime('%d-%m-%Y') }}</td>
+                        <td style="padding: 12px;">{{ venta.fecha.strftime('%d/%m/%Y') }}</td>
                         
-                        <td style="text-align: left; padding: 0;">
-                            <table class="detalle-tabla">
-                                <tr>
-                                    <th>Cant.</th>
-                                    <th>Tamaño</th>
-                                    <th>Ingredientes</th>
-                                    <th>Subtotal</th>
-                                </tr>
-                                {% for detalle in venta.detalles %}
-                                <tr>
-                                    <td>{{ detalle.cantidad }}</td>
-                                    <td>{{ detalle.pizza.tamano }}</td>
-                                    <td>{{ detalle.pizza.ingredientes }}</td>
-                                    <td>${{ detalle.subtotal }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
+                        <td style="padding: 12px; text-align: center;">
+                            <a href="{{ url_for('detalle_venta', id=venta.id_pedido) }}" style="background: #17a2b8; color: white; padding: 6px 12px; border-radius: 5px; text-decoration: none; font-size: 0.9rem;">
+                                <i class="fas fa-eye"></i> Ver Pedido
+                            </a>
                         </td>
-                        
-                        <td><strong>${{ venta.total }}</strong></td>
+
+                        <td style="padding: 12px; font-weight: 700; color: #ff7e5f;">${{ venta.total }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            
-            <h3 style="text-align: right; background: white; padding: 10px; border-radius: 5px;">
-                Ventas totales acumuladas: ${{ total }}
-            </h3>
-        {% else %}
-            <p style="text-align: center; font-style: italic;">
-                No se encontraron ventas para esta búsqueda o aún no has buscado nada. ¡Intenta buscar el día o mes actual!
-            </p>
-        {% endif %}
-    </div>
-
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="{{ url_for('index') }}"><button>Volver a Captura de Pedidos</button></a>
-    </div>
-
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 50px; color: #999;">
+            <i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p style="margin-top: 15px;">No hay ventas para mostrar</p>
+        </div>
+    {% endif %}
 </div>
-
-</body>
-</html>
+{% endblock %}

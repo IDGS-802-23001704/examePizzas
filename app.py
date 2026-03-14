@@ -61,7 +61,7 @@ def index():
             
             pizza_dict = {
                 'tamano': tamano,
-                'ingredientes': ', '.join(ingredientes) if ingredientes else 'Queso (Sin extras)',
+                'ingredientes': ', '.join(ingredientes) if ingredientes else 'Queso',
                 'num_pizzas': num_pizzas,
                 'subtotal': float(subtotal)
             }
@@ -118,9 +118,13 @@ def index():
             
             flash(f'¡Pedido guardado con éxito! Importe total a pagar: ${total_pedido}', 'success')
             return redirect(url_for('index'))
+        
+    hoy = date.today()
+    ventas_hoy = Pedido.query.filter_by(fecha=hoy).all()
+    total_ventas_hoy = sum(venta.total for venta in ventas_hoy)
             
     total_temporal = sum(item['subtotal'] for item in session.get('pedido', []))
-    return render_template('index.html', form=form, pedido=session.get('pedido', []), total=total_temporal)
+    return render_template('index.html', form=form, pedido=session.get('pedido', []), total=total_temporal, ventas_hoy=ventas_hoy, total_ventas_hoy=total_ventas_hoy)
 
 # --- RUTA PARA QUITAR PIZZA ---
 @app.route('/quitar/<int:index>')
@@ -133,30 +137,33 @@ def quitar_pizza(index):
         session.modified = True
     return redirect(url_for('index'))
 
-# --- RUTA PARA CONSULTAS (Por Día o Mes) ---
+# --- RUTA PARA CONSULTAS (Por Día y/o Mes) ---
 @app.route('/ventas', methods=['GET', 'POST'])
 def ventas():
     ventas_encontradas = []
     gran_total = 0
     
     if request.method == 'POST':
-        tipo_busqueda = request.form.get('tipo_busqueda')
+        dia_num = request.form.get('dia_seleccionado')
+        mes_num = request.form.get('mes_seleccionado')
         
-        if tipo_busqueda == 'dia':
-            dia_num = request.form.get('dia_seleccionado')
-            if dia_num:
-                # Usamos func.dayofweek que es compatible con MySQL
-                ventas_encontradas = Pedido.query.filter(func.dayofweek(Pedido.fecha) == int(dia_num)).all()
-                
-        elif tipo_busqueda == 'mes':
-            mes_num = request.form.get('mes_seleccionado')
-            if mes_num:
-                # Usamos func.month que es compatible con MySQL
-                ventas_encontradas = Pedido.query.filter(func.month(Pedido.fecha) == int(mes_num)).all()
-        
+        query = Pedido.query
+        if dia_num and dia_num != 'todos':
+            query = query.filter(func.dayofweek(Pedido.fecha) == int(dia_num))
+            
+        if mes_num and mes_num != 'todos':
+            query = query.filter(func.month(Pedido.fecha) == int(mes_num))
+            
+        ventas_encontradas = query.all()
         gran_total = sum(v.total for v in ventas_encontradas)
                 
     return render_template('ventas.html', ventas=ventas_encontradas, total=gran_total)
 
+@app.route('/detalle/<int:id>', methods=['GET'])
+def detalle_venta(id):
+    # Buscamos el pedido por su ID. Si no existe, mandamos un error 404.
+    pedido = Pedido.query.get_or_404(id)
+    return render_template('detalle.html', pedido=pedido)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

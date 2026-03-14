@@ -18,7 +18,7 @@ class PedidoForm(FlaskForm):
     pina = BooleanField('Piña $10')
     champinones = BooleanField('Champiñones $10')
     
-    num_pizzas = IntegerField('Num. de Pizzas', validators=[
+    num_pizzas = IntegerField('Cantidad', validators=[
         DataRequired(message="Ingresa la cantidad"),
         NumberRange(min=1, message="Debes pedir al menos 1 pizza")
     ])

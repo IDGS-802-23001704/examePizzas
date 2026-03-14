@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffe4d5; padding-bottom: 15px; margin-bottom: 20px;">
+        <h3><i class="fas fa-receipt"></i> Detalle del Pedido #{{ pedido.id_pedido }}</h3>
+        <a onClick="history.back();" style="background: #6c757d; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div style="margin-bottom: 20px; background: #fffaf5; padding: 15px; border-radius: 8px;">
+        <h4 style="margin-top: 0; color: #555;"><i class="fas fa-user"></i> Datos del Cliente</h4>
+        <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ pedido.cliente.nombre }}</p>
+        <p style="margin: 5px 0;"><strong>Teléfono:</strong> {{ pedido.cliente.telefono }}</p>
+        <p style="margin: 5px 0;"><strong>Dirección:</strong> {{ pedido.cliente.direccion }}</p>
+        <p style="margin: 5px 0;"><strong>Fecha del pedido:</strong> {{ pedido.fecha.strftime('%d/%m/%Y') }}</p>
+    </div>
+
+    <h4><i class="fas fa-pizza-slice"></i> Pizzas en este pedido</h4>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background: #ffe4d5;">
+                    <th style="padding: 10px; text-align: center;">Cantidad</th>
+                    <th style="padding: 10px; text-align: left;">Tamaño</th>
+                    <th style="padding: 10px; text-align: left;">Ingredientes</th>
+                    <th style="padding: 10px; text-align: right;">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in pedido.detalles %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px; text-align: center; font-weight: bold;">{{ detalle.cantidad }}x</td>
+                    <td style="padding: 10px;">{{ detalle.pizza.tamano }}</td>
+                    <td style="padding: 10px; color: #666;">{{ detalle.pizza.ingredientes }}</td>
+                    <td style="padding: 10px; text-align: right;">${{ detalle.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="text-align: right; margin-top: 20px; font-size: 1.2rem;">
+        <strong>Total Pagado:</strong> <span style="color: #ff7e5f; font-weight: bold;">${{ pedido.total }}</span>
+    </div>
+</div>
+{% endblock %}
